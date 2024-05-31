@@ -11,7 +11,6 @@ drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 forehead_outline = [21, 71, 70, 46, 225, 224, 223, 222, 221, 193, 168, 417, 441, 442, 443, 444, 445, 276, 300, 301, 251, 284, 332, 297, 338, 10, 109, 67, 103, 54]
 forehead_inners = [68, 104, 69, 108, 151, 337, 299, 333, 298] + [43, 105, 66, 107, 9, 336, 296, 334, 293] + [53, 52, 65, 55, 8, 285, 295, 282, 283]
-forehead_landmarks = forehead_outline + forehead_inners
 
 left_cheek_outline = [234, 227, 116, 117, 118, 101, 36, 203, 165, 92, 186, 57, 43 ] + [202, 210, 169] + [150, 136, 172, 58, 132, 93]
 left_cheek_inners = [137, 123, 50, 205, 206] + [177, 147, 187, 207, 216] + [215, 213, 192, 214, 212] + [138, 135]
@@ -46,6 +45,7 @@ with mp_face_mesh.FaceMesh(
     
     # Display results 
     if results.multi_face_landmarks:
+        original = image.copy()
         mask = np.zeros_like(image)
 
         for face_landmarks in results.multi_face_landmarks:
@@ -62,9 +62,11 @@ with mp_face_mesh.FaceMesh(
               cx, cy = int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])
               cv2.circle(image, (cx, cy), 1, (250, 200, 200), -1)
         
-        # Apply the mask to the image
-        masked_image = cv2.bitwise_and(image, mask)
-        cv2.imshow('Masked Face and Meshed Face', cv2.hconcat([masked_image, image]))
+        # Apply the mask and mesh to the image
+        meshed_image = image
+        meshed_and_masked_image = cv2.bitwise_and(meshed_image, mask)
+        masked_image = cv2.bitwise_and(original, mask)
+        cv2.imshow('Masked Face, Meshed Face, Masked and Meshed Face', cv2.hconcat([masked_image, meshed_image, meshed_and_masked_image]))
 
     if cv2.waitKey(5) & 0xFF == ord('q'):
       break
