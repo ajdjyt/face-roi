@@ -15,11 +15,14 @@ forehead_inners = [68, 104, 69, 108, 151, 337, 299, 333, 298] + [43, 105, 66, 10
 forehead_landmarks = forehead_outline + forehead_inners
 
 left_cheek_outline = [234, 227, 116, 117, 118, 101, 36, 203, 165, 92, 186, 57, 43 ] + [202, 210, 169] + [150, 136, 172, 58, 132, 93]
+left_cheek_inners = []
 
 right_cheek_outline = [454, 447, 345, 346, 330, 266, 423, 391, 322, 410, 287, 273 ] + [422, 430, 394] + [379, 365, 397, 288, 361, 323]
-
+right_cheek_inners = []
 
 outlines = [forehead_outline, left_cheek_outline, right_cheek_outline]
+inners = forehead_inners + left_cheek_inners + right_cheek_inners
+landmarks = outlines + inners
 
 cap = cv2.VideoCapture(0)
 
@@ -47,14 +50,12 @@ with mp_face_mesh.FaceMesh(
         mask = np.zeros_like(image)
 
         for face_landmarks in results.multi_face_landmarks:
-          
-            selected_landmarks = []
+
+            selected_landmarks = [face_landmarks.landmark[idx] for idx in landmarks]
             normalized_landmark_list = landmark_pb2.NormalizedLandmarkList()
             
-            for idx in forehead_landmarks:
-                # Create list of landmarks
-                selected_landmarks.append(face_landmarks.landmark[idx])
-                # Create LL of landmarks
+            # Create LL of landmarks
+            for idx in landmarks:
                 landmark = landmark_pb2.NormalizedLandmark()
                 landmark.x = face_landmarks.landmark[idx].x
                 landmark.y = face_landmarks.landmark[idx].y
