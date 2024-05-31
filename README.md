@@ -7,7 +7,7 @@ to change the ROIs use the reference of the [Canonical face model image](canonic
 
 ## Dependencies
 
-Depends on numpy, opencv and [mediapipe](https://github.com/google-ai-edge/mediapipe)
+Depends on numpy, opencv and [mediapipe](https://github.com/google-ai-edge/mediapipe).
 
 ```bash
 pip install numpy opencv-python mediapipe

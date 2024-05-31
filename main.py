@@ -1,6 +1,5 @@
 import cv2
 import mediapipe as mp
-from mediapipe.framework.formats import landmark_pb2
 import numpy as np
 
 mp_drawing = mp.solutions.drawing_utils
@@ -21,8 +20,8 @@ right_cheek_outline = [454, 447, 345, 346, 330, 266, 423, 391, 322, 410, 287, 27
 right_cheek_inners = []
 
 outlines = [forehead_outline, left_cheek_outline, right_cheek_outline]
-inners = forehead_inners + left_cheek_inners + right_cheek_inners
-landmarks = outlines + inners
+inners = [forehead_inners + left_cheek_inners + right_cheek_inners]
+landmarks=[i for sub in outlines+inners for i in sub]
 
 cap = cv2.VideoCapture(0)
 
@@ -52,14 +51,6 @@ with mp_face_mesh.FaceMesh(
         for face_landmarks in results.multi_face_landmarks:
 
             selected_landmarks = [face_landmarks.landmark[idx] for idx in landmarks]
-            normalized_landmark_list = landmark_pb2.NormalizedLandmarkList()
-            
-            # Create LL of landmarks
-            for idx in landmarks:
-                landmark = landmark_pb2.NormalizedLandmark()
-                landmark.x = face_landmarks.landmark[idx].x
-                landmark.y = face_landmarks.landmark[idx].y
-                normalized_landmark_list.landmark.append(landmark)
             
             # Plot the outline on mask for every ROI
             for selected_outline in outlines:
@@ -73,7 +64,7 @@ with mp_face_mesh.FaceMesh(
         
         # Apply the mask to the image
         masked_image = cv2.bitwise_and(image, mask)
-        cv2.imshow('Masked Face', masked_image)
+        cv2.imshow('Masked Face and Meshed Face', cv2.hconcat([masked_image, image]))
 
     if cv2.waitKey(5) & 0xFF == ord('q'):
       break
