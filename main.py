@@ -18,6 +18,9 @@ left_cheek_outline = [234, 227, 116, 117, 118, 101, 36, 203, 165, 92, 186, 57, 4
 
 right_cheek_outline = [454, 447, 345, 346, 330, 266, 423, 391, 322, 410, 287, 273 ] + [422, 430, 394] + [379, 365, 397, 288, 361, 323]
 
+
+outlines = [forehead_outline, left_cheek_outline, right_cheek_outline]
+
 cap = cv2.VideoCapture(0)
 
 with mp_face_mesh.FaceMesh(
@@ -58,7 +61,7 @@ with mp_face_mesh.FaceMesh(
                 normalized_landmark_list.landmark.append(landmark)
             
             # Plot the outline on mask for every ROI
-            for selected_outline in [forehead_outline, left_cheek_outline, right_cheek_outline]:
+            for selected_outline in outlines:
               selected_points = np.array([(int(face_landmarks.landmark[landmark].x * image.shape[1]), int(face_landmarks.landmark[landmark].y * image.shape[0])) for landmark in selected_outline])
               cv2.fillPoly(mask, [selected_points], (255, 255, 255))
             
