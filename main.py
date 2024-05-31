@@ -14,10 +14,10 @@ forehead_inners = [68, 104, 69, 108, 151, 337, 299, 333, 298] + [43, 105, 66, 10
 forehead_landmarks = forehead_outline + forehead_inners
 
 left_cheek_outline = [234, 227, 116, 117, 118, 101, 36, 203, 165, 92, 186, 57, 43 ] + [202, 210, 169] + [150, 136, 172, 58, 132, 93]
-left_cheek_inners = []
+left_cheek_inners = [137, 123, 50, 205, 206] + [177, 147, 187, 207, 216] + [215, 213, 192, 214, 212] + [138, 135]
 
-right_cheek_outline = [454, 447, 345, 346, 330, 266, 423, 391, 322, 410, 287, 273 ] + [422, 430, 394] + [379, 365, 397, 288, 361, 323]
-right_cheek_inners = []
+right_cheek_outline = [454, 447, 345, 346, 347, 330, 266, 423, 391, 322, 410, 287, 273 ] + [422, 430, 394] + [379, 365, 397, 288, 361, 323] 
+right_cheek_inners = [366, 352, 280, 425, 426] + [401, 376, 411, 427, 436] + [435, 433, 416, 434, 432] + [367, 364]
 
 outlines = [forehead_outline, left_cheek_outline, right_cheek_outline]
 inners = [forehead_inners + left_cheek_inners + right_cheek_inners]
