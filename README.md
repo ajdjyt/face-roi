@@ -12,3 +12,11 @@ Depends on numpy, opencv and [mediapipe](https://github.com/google-ai-edge/media
 ```bash
 pip install numpy opencv-python mediapipe
 ```
+
+## Running
+
+Use main.py
+
+```bash
+python main.py
+```
