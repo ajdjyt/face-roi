@@ -1,20 +1,25 @@
 import cv2
 import mediapipe as mp
+from mediapipe.framework.formats import landmark_pb2
+import numpy as np
 
 mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
 mp_face_mesh = mp.solutions.face_mesh
 
 det_conf=0.5
 track_conf=0.5
-
-#cheek_left_indices = [146, 150, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 130, 131, 132, 133, 134, 135]
-#cheek_right_indices = [330, 329, 328, 327, 326, 325, 324, 323, 322, 321, 320, 319, 263, 262, 261, 260, 259, 258]
-#forehead_indices = [10, 272, 276, 280, 283, 285, 290, 293, 296, 168, 191]
-
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
+forehead_outline = [21, 71, 70, 46, 225, 224, 223, 222, 221, 193, 168, 417, 441, 442, 443, 444, 445, 276, 300, 301, 251, 284, 332, 297, 338, 10, 109, 67, 103, 54]
+forehead_inners = [68, 104, 69, 108, 151, 337, 299, 333, 298] + [43, 105, 66, 107, 9, 336, 296, 334, 293] + [53, 52, 65, 55, 8, 285, 295, 282, 283]
+forehead_landmarks = forehead_outline + forehead_inners
+
+left_cheek_outline = [234, 227, 116, 117, 118, 101, 36, 203, 165, 92, 186, 57, 43 ] + [202, 210, 169] + [150, 136, 172, 58, 132, 93]
+
+right_cheek_outline = [454, 447, 345, 346, 330, 266, 423, 391, 322, 410, 287, 273 ] + [422, 430, 394] + [379, 365, 397, 288, 361, 323]
+
 cap = cv2.VideoCapture(0)
+
 with mp_face_mesh.FaceMesh(
     max_num_faces=1,
     refine_landmarks=True,
@@ -36,33 +41,38 @@ with mp_face_mesh.FaceMesh(
     
     # Display results 
     if results.multi_face_landmarks:
-      for face_landmarks in results.multi_face_landmarks:
-        '''
-        mp_drawing.draw_landmarks(
-            image=image,
-            landmark_list=face_landmarks,
-            connections=mp_face_mesh.FACEMESH_TESSELATION,
-            landmark_drawing_spec=None,
-            connection_drawing_spec=mp_drawing_styles
-            .get_default_face_mesh_tesselation_style())
-        '''
-        left_cheek_landmarks = [269, 150]
-        right_cheek_landmarks = [47, 165]
-        forehead_landmarks = [353, 134, 348]
-        #left_cheek_landmarks = [234, 291, 5, 6, 7, 8, 269, 150]
-        #right_cheek_landmarks = [454, 268, 271, 270, 265, 47, 165]
-        #forehead_landmarks = [10, 151, 171, 148, 152, 377, 378, 379, 380, 381]
+        mask = np.zeros_like(image)
 
-        selected_landmarks = []
-        for idx in left_cheek_landmarks + right_cheek_landmarks + forehead_landmarks:
-          selected_landmarks.append(face_landmarks.landmark[idx])
+        for face_landmarks in results.multi_face_landmarks:
+          
+            selected_landmarks = []
+            normalized_landmark_list = landmark_pb2.NormalizedLandmarkList()
+            
+            for idx in forehead_landmarks:
+                # Create list of landmarks
+                selected_landmarks.append(face_landmarks.landmark[idx])
+                # Create LL of landmarks
+                landmark = landmark_pb2.NormalizedLandmark()
+                landmark.x = face_landmarks.landmark[idx].x
+                landmark.y = face_landmarks.landmark[idx].y
+                normalized_landmark_list.landmark.append(landmark)
+            
+            # Plot the outline on mask for every ROI
+            for selected_outline in [forehead_outline, left_cheek_outline, right_cheek_outline]:
+              selected_points = np.array([(int(face_landmarks.landmark[landmark].x * image.shape[1]), int(face_landmarks.landmark[landmark].y * image.shape[0])) for landmark in selected_outline])
+              cv2.fillPoly(mask, [selected_points], (255, 255, 255))
+            
+            # Plot the mesh landmarks in every ROI
+            for landmark in selected_landmarks:
+              cx, cy = int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])
+              cv2.circle(image, (cx, cy), 1, (250, 200, 200), -1)
+        
+        # Apply the mask to the image
+        masked_image = cv2.bitwise_and(image, mask)
+        cv2.imshow('Masked Face', masked_image)
 
-        # Draw the cheeks and forehead
-        for landmark in selected_landmarks:
-          cx, cy = int(landmark.x * image.shape[1]), int(landmark.y * image.shape[0])
-          cv2.circle(image, (cx, cy), 1, (250, 200, 200), -1)
-    cv2.imshow('MediaPipe Face Mesh', cv2.flip(image, 1))
-    if cv2.waitKey(5) & 0xFF == 27:
+    if cv2.waitKey(5) & 0xFF == ord('q'):
       break
   
 cap.release()
+cv2.destroyAllWindows()
