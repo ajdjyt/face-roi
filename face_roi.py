@@ -4,17 +4,8 @@ import numpy as np
 import h5py
 import imageio as iio
 
-mp_drawing = mp.solutions.drawing_utils
-mp_face_mesh = mp.solutions.face_mesh
-
-det_conf=0.5
-track_conf=0.5
-drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
-
-
-
-def get_face_roi(stream):
-    with mp_face_mesh.FaceMesh(
+def get_face_roi(stream, det_conf:float=0.5, track_conf:float=0.5):
+    with mp.solutions.face_mesh.FaceMesh(
         max_num_faces=1,
         refine_landmarks=True,
         min_detection_confidence=det_conf,
@@ -69,7 +60,9 @@ def get_face_roi(stream):
             meshed_and_masked_image = cv2.bitwise_and(meshed_image, mask)
             masked_image = cv2.bitwise_and(original, mask)
             yield masked_image, meshed_image, meshed_and_masked_image
-
+        else:
+            print("No face detected")
+            continue
     stream.release()
 
 def display_roi(stream):
@@ -86,18 +79,21 @@ def display_roi(stream):
                 return
 
     except StopIteration:
-        cv2.destroyAllWindows()
+        print("End of Stream")
         return
 
 def mat_converter(path:str, out_path:str='')->str:
     if out_path == '':
         out_path = path[:path.find(path.split('/')[-1])] + 'converted/'
         print(f"output path set to {out_path}")
-    frames = np.array(h5py.File(path, 'r')['RawFrames'])
-    name = out_path + str(path.split('/')[-1]).strip() + ".mp4"
+    mat = h5py.File(path, 'r')
+    frames = np.array(mat['RawFrames'])
+    name = out_path + str(path.split('/')[-1]).strip() + ".avi"
     writer = iio.get_writer(name, fps=30.0)
     for frame_idx in range(frames.shape[-1]):
-        writer.append_data(np.transpose(frames[:, :, :, frame_idx], (2, 1, 0)).astype(np.uint8))
+        frame = frames[:, :, :, frame_idx]*255
+        frame = np.transpose(frame, (2, 1, 0)).astype(np.uint8)
+        writer.append_data(frame)
     writer.close()
     return name
 
