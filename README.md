@@ -21,7 +21,7 @@ Use either the get_face_roi function or draw_roi functions from face_roi.py.
 from face_roi import display_roi, get_face_roi, mat_loader, mat_converter
 ```
 
-Also note that using mat_converter and display_roi functions is not working as expected. It is reccomended to use something like converter.py to convert the mat files beforehand.
+Also note that using mat_converter and display_roi functions in the same file is not working as expected. It is recommended to use something like converter.py to convert the mat files beforehand.
 
 main.py works, but it is just a proof of concept with little functionality.
 
